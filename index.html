@@ -3,48 +3,829 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SB Squares">
     <title>Super Bowl Squares</title>
-    <!-- Add Firebase SDK scripts -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
-    <script>
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        }; 
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        // Initialize Database
-        const database = firebase.database();
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        function loadSquares() {
-            const squaresRef = database.ref('squares');
-            squaresRef.once('value').then(snapshot => {
-                const squares = snapshot.val();
-                // Code to populate squares on page load
-                populateSquares(squares);
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: #48bb78;
+        }
+
+        button.secondary:hover {
+            background: #38a169;
+        }
+
+        button.danger {
+            background: #f56565;
+        }
+
+        button.danger:hover {
+            background: #e53e3e;
+        }
+
+        .grid-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .grid-wrapper {
+            display: inline-block;
+            min-width: min-content;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 40px repeat(10, 1fr);
+            grid-template-rows: 40px repeat(10, 1fr);
+            gap: 2px;
+            background: #e2e8f0;
+            padding: 2px;
+            border-radius: 8px;
+        }
+
+        .team-label {
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .number-label {
+            background: #4a5568;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .square {
+            background: white;
+            min-height: 60px;
+            min-width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            text-align: center;
+            padding: 4px;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .square:hover {
+            background: #edf2f7;
+            transform: scale(1.05);
+        }
+
+        .square.claimed {
+            background: #bee3f8;
+            font-weight: 600;
+        }
+
+        .square.winner {
+            background: #ffd700;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .score-tracker {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .score-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .score-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .score-group label {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .score-group input {
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .score-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .current-winner {
+            background: #fef5e7;
+            border: 2px solid #f39c12;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #875a00;
+        }
+
+        .quarter-btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .quarter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .quarter-btn:hover {
+            transform: translateY(0);
+        }
+
+        .history-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .history-item.locked {
+            background: #e6fffa;
+            border-left-color: #48bb78;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .quarter-label {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .history-score {
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .history-winner {
+            color: #2d3748;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .lock-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: #48bb78;
+        }
+
+        .lock-btn.locked {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .team-names {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .team-name-input {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .team-name-input label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .team-name-input input {
+            padding: 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .square {
+                min-height: 50px;
+                min-width: 50px;
+                font-size: 10px;
+            }
+
+            .number-label {
+                font-size: 11px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏈 Super Bowl Squares</h1>
+            <div class="team-names">
+                <div class="team-name-input">
+                    <label>Team 1:</label>
+                    <input type="text" id="team1Name" value="Team 1" maxlength="20">
+                </div>
+                <div class="team-name-input">
+                    <label>Team 2:</label>
+                    <input type="text" id="team2Name" value="Team 2" maxlength="20">
+                </div>
+            </div>
+            <div class="controls">
+                <button onclick="randomizeNumbers()">🎲 Randomize Numbers</button>
+                <button onclick="clearGrid()" class="danger">🗑️ Clear Grid</button>
+                <button onclick="resetGame()" class="secondary">🔄 New Game</button>
+            </div>
+        </div>
+
+        <div class="score-tracker">
+            <h2 style="margin-bottom: 15px; color: #667eea;">Score Tracker</h2>
+            <div class="quarter-selector" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap;">
+                <button onclick="selectQuarter(1)" id="q1Btn" class="quarter-btn active">Q1</button>
+                <button onclick="selectQuarter(2)" id="q2Btn" class="quarter-btn">Q2</button>
+                <button onclick="selectQuarter(3)" id="q3Btn" class="quarter-btn">Q3</button>
+                <button onclick="selectQuarter(4)" id="q4Btn" class="quarter-btn">Final</button>
+            </div>
+            <div class="score-inputs">
+                <div class="score-group">
+                    <label id="team1ScoreLabel">Team 1 Score:</label>
+                    <input type="number" id="team1Score" min="0" value="0" onchange="updateWinner()">
+                </div>
+                <div class="score-group">
+                    <label id="team2ScoreLabel">Team 2 Score:</label>
+                    <input type="number" id="team2Score" min="0" value="0" onchange="updateWinner()">
+                </div>
+            </div>
+            <div id="winnerDisplay" class="current-winner" style="display: none;"></div>
+        </div>
+
+        <div class="score-tracker" id="quarterHistory">
+            <h2 style="margin-bottom: 15px; color: #667eea;">Quarter Winners</h2>
+            <div id="historyList" style="display: grid; gap: 10px;">
+                <div style="text-align: center; color: #718096; padding: 20px;">Enter scores for each quarter to track winners</div>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <div class="grid-wrapper">
+                <div class="grid" id="grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="nameModal">
+        <div class="modal-content">
+            <h2>Claim Square</h2>
+            <input type="text" id="nameInput" placeholder="Enter your name" maxlength="20">
+            <div class="modal-buttons">
+                <button onclick="closeModal()">Cancel</button>
+                <button onclick="claimSquare()" class="secondary">Claim</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBle542HuSb4Wwi3sArKHOpdpgoYd5UZsY",
+            authDomain: "superbowlsquares-4f8b7.firebaseapp.com",
+            databaseURL: "https://superbowlsquares-4f8b7-default-rtdb.firebaseio.com/",
+            projectId: "superbowlsquares-4f8b7",
+            storageBucket: "superbowlsquares-4f8b7.firebasestorage.app",
+            messagingSenderId: "594465875696",
+            appId: "1:594465875696:web:bb0977450f4105e593c435",
+            measurementId: "G-SZNN5KGED3"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const gameRef = database.ref('game');
+
+        let currentSquare = null;
+        let grid = Array(10).fill().map(() => Array(10).fill(null));
+        let team1Numbers = [];
+        let team2Numbers = [];
+        let currentQuarter = 1;
+        let quarterScores = {
+            1: { team1: 0, team2: 0, locked: false },
+            2: { team1: 0, team2: 0, locked: false },
+            3: { team1: 0, team2: 0, locked: false },
+            4: { team1: 0, team2: 0, locked: false }
+        };
+        let isInitialLoad = true;
+
+        // Save game state to Firebase
+        function saveToFirebase() {
+            gameRef.set({
+                grid: grid,
+                team1Numbers: team1Numbers,
+                team2Numbers: team2Numbers,
+                quarterScores: quarterScores,
+                currentQuarter: currentQuarter,
+                team1Name: document.getElementById('team1Name').value,
+                team2Name: document.getElementById('team2Name').value
             });
         }
 
-        function populateSquares(squares) {
-            // Code to add squares to the DOM
-            console.log(squares);
-            // Implement your logic to handle squares here
+        // Wait for DOM to be ready before setting up Firebase listener
+        document.addEventListener('DOMContentLoaded', function() {
+            // Listen for changes from Firebase
+            gameRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    // Update local state from Firebase
+                    if (data.grid) {
+                        grid = data.grid;
+                    }
+                    if (data.team1Numbers) {
+                        team1Numbers = data.team1Numbers;
+                    }
+                    if (data.team2Numbers) {
+                        team2Numbers = data.team2Numbers;
+                    }
+                    if (data.quarterScores) {
+                        quarterScores = data.quarterScores;
+                    }
+                    if (data.team1Name) {
+                        document.getElementById('team1Name').value = data.team1Name;
+                    }
+                    if (data.team2Name) {
+                        document.getElementById('team2Name').value = data.team2Name;
+                    }
+                    
+                    // Update UI
+                    initGrid();
+                    if (!isInitialLoad) {
+                        // Update current quarter display
+                        const currentQ = data.currentQuarter || currentQuarter;
+                        if (currentQ !== currentQuarter) {
+                            selectQuarter(currentQ);
+                        } else {
+                            document.getElementById('team1Score').value = quarterScores[currentQuarter].team1;
+                            document.getElementById('team2Score').value = quarterScores[currentQuarter].team2;
+                            updateWinner();
+                        }
+                    }
+                    isInitialLoad = false;
+                }
+            });
+
+            // Initialize the grid
+            initGrid();
+
+            // Set up event listeners
+            document.getElementById('nameInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    claimSquare();
+                }
+            });
+
+            document.getElementById('team1Name').addEventListener('input', () => {
+                updateTeamLabels();
+                saveToFirebase();
+            });
+            
+            document.getElementById('team2Name').addEventListener('input', () => {
+                updateTeamLabels();
+                saveToFirebase();
+            });
+        });
+
+        function randomizeNumbers() {
+            team1Numbers = shuffle([...Array(10).keys()]);
+            team2Numbers = shuffle([...Array(10).keys()]);
+            initGrid();
+            updateWinner();
+            saveToFirebase();
         }
 
-        window.onload = function() {
-            loadSquares();
-        };
+        function clearGrid() {
+            if (confirm('Are you sure you want to clear all names from the grid?')) {
+                grid = Array(10).fill().map(() => Array(10).fill(null));
+                initGrid();
+                updateWinner();
+            }
+        }
+
+        function resetGame() {
+            if (confirm('Start a new game? This will clear the grid and randomize numbers.')) {
+                grid = Array(10).fill().map(() => Array(10).fill(null));
+                team1Numbers = [];
+                team2Numbers = [];
+                currentQuarter = 1;
+                quarterScores = {
+                    1: { team1: 0, team2: 0, locked: false },
+                    2: { team1: 0, team2: 0, locked: false },
+                    3: { team1: 0, team2: 0, locked: false },
+                    4: { team1: 0, team2: 0, locked: false }
+                };
+                document.getElementById('team1Score').value = 0;
+                document.getElementById('team2Score').value = 0;
+                document.getElementById('team1Score').disabled = false;
+                document.getElementById('team2Score').disabled = false;
+                selectQuarter(1);
+                initGrid();
+                updateWinner();
+            }
+        }
+
+        function selectQuarter(quarter) {
+            // Save current scores before switching
+            if (!quarterScores[currentQuarter].locked) {
+                quarterScores[currentQuarter].team1 = parseInt(document.getElementById('team1Score').value) || 0;
+                quarterScores[currentQuarter].team2 = parseInt(document.getElementById('team2Score').value) || 0;
+            }
+
+            currentQuarter = quarter;
+            
+            // Update button states
+            document.querySelectorAll('.quarter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`q${quarter}Btn`).classList.add('active');
+            
+            // Load scores for selected quarter
+            document.getElementById('team1Score').value = quarterScores[quarter].team1;
+            document.getElementById('team2Score').value = quarterScores[quarter].team2;
+            
+            // Disable inputs if quarter is locked
+            document.getElementById('team1Score').disabled = quarterScores[quarter].locked;
+            document.getElementById('team2Score').disabled = quarterScores[quarter].locked;
+            
+            updateWinner();
+            updateHistory();
+            saveToFirebase();
+        }
+
+        function lockQuarter(quarter) {
+            quarterScores[quarter].locked = !quarterScores[quarter].locked;
+            if (quarter === currentQuarter) {
+                document.getElementById('team1Score').disabled = quarterScores[quarter].locked;
+                document.getElementById('team2Score').disabled = quarterScores[quarter].locked;
+            }
+            updateHistory();
+            saveToFirebase();
+        }
+
+        function updateHistory() {
+            const historyList = document.getElementById('historyList');
+            const team1Name = document.getElementById('team1Name').value || 'Team 1';
+            const team2Name = document.getElementById('team2Name').value || 'Team 2';
+            
+            let hasAnyScores = false;
+            let html = '';
+            
+            for (let q = 1; q <= 4; q++) {
+                const scores = quarterScores[q];
+                if (scores.team1 > 0 || scores.team2 > 0 || scores.locked) {
+                    hasAnyScores = true;
+                    const team1Last = scores.team1 % 10;
+                    const team2Last = scores.team2 % 10;
+                    
+                    let winnerText = '';
+                    if (team1Numbers.length > 0 && team2Numbers.length > 0) {
+                        const team1Index = team1Numbers.indexOf(team1Last);
+                        const team2Index = team2Numbers.indexOf(team2Last);
+                        
+                        if (team1Index !== -1 && team2Index !== -1) {
+                            const winnerName = grid[team2Index][team1Index];
+                            if (winnerName) {
+                                winnerText = `<div class="history-winner">🏆 ${winnerName} (${team1Last}, ${team2Last})</div>`;
+                            } else {
+                                winnerText = `<div class="history-winner">Unclaimed (${team1Last}, ${team2Last})</div>`;
+                            }
+                        }
+                    }
+                    
+                    const qLabel = q === 4 ? 'Final' : `Q${q}`;
+                    const lockBtnText = scores.locked ? '🔓 Unlock' : '🔒 Lock';
+                    const lockBtnClass = scores.locked ? 'locked' : '';
+                    
+                    html += `
+                        <div class="history-item ${scores.locked ? 'locked' : ''}">
+                            <div class="history-header">
+                                <span class="quarter-label">${qLabel}</span>
+                                <button class="lock-btn ${lockBtnClass}" onclick="lockQuarter(${q})">${lockBtnText}</button>
+                            </div>
+                            <div class="history-score">${team1Name}: ${scores.team1} | ${team2Name}: ${scores.team2}</div>
+                            ${winnerText}
+                        </div>
+                    `;
+                }
+            }
+            
+            if (!hasAnyScores) {
+                html = '<div style="text-align: center; color: #718096; padding: 20px;">Enter scores for each quarter to track winners</div>';
+            }
+            
+            historyList.innerHTML = html;
+        }
+
+        function initGrid() {
+            const gridElement = document.getElementById('grid');
+            gridElement.innerHTML = '';
+
+            // Top-left corner (empty)
+            const corner = document.createElement('div');
+            corner.className = 'team-label';
+            gridElement.appendChild(corner);
+
+            // Team 1 header (top row)
+            for (let i = 0; i < 10; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'number-label';
+                cell.id = `team1-${i}`;
+                cell.textContent = team1Numbers[i] !== undefined ? team1Numbers[i] : '?';
+                gridElement.appendChild(cell);
+            }
+
+            // Grid rows with Team 2 numbers on the left
+            for (let row = 0; row < 10; row++) {
+                // Team 2 number
+                const rowLabel = document.createElement('div');
+                rowLabel.className = 'number-label';
+                rowLabel.id = `team2-${row}`;
+                rowLabel.textContent = team2Numbers[row] !== undefined ? team2Numbers[row] : '?';
+                gridElement.appendChild(rowLabel);
+
+                // Grid squares
+                for (let col = 0; col < 10; col++) {
+                    const square = document.createElement('div');
+                    square.className = 'square';
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    square.onclick = () => openModal(row, col);
+                    if (grid[row][col]) {
+                        square.textContent = grid[row][col];
+                        square.classList.add('claimed');
+                    }
+                    gridElement.appendChild(square);
+                }
+            }
+
+            updateTeamLabels();
+        }
+
+        function updateTeamLabels() {
+            const team1 = document.getElementById('team1Name').value || 'Team 1';
+            const team2 = document.getElementById('team2Name').value || 'Team 2';
+            document.getElementById('team1ScoreLabel').textContent = `${team1} Score:`;
+            document.getElementById('team2ScoreLabel').textContent = `${team2} Score:`;
+        }
+
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function openModal(row, col) {
+            currentSquare = { row, col };
+            const nameInput = document.getElementById('nameInput');
+            nameInput.value = grid[row][col] || '';
+            document.getElementById('nameModal').classList.add('active');
+            nameInput.focus();
+        }
+
+        function closeModal() {
+            document.getElementById('nameModal').classList.remove('active');
+            currentSquare = null;
+        }
+
+        function claimSquare() {
+            if (!currentSquare) return;
+            
+            const name = document.getElementById('nameInput').value.trim();
+            const { row, col } = currentSquare;
+            
+            grid[row][col] = name || null;
+            initGrid();
+            updateWinner();
+            saveToFirebase();
+            closeModal();
+        }
+
+        function updateWinner() {
+            // Save current scores to the current quarter
+            if (!quarterScores[currentQuarter].locked) {
+                quarterScores[currentQuarter].team1 = parseInt(document.getElementById('team1Score').value) || 0;
+                quarterScores[currentQuarter].team2 = parseInt(document.getElementById('team2Score').value) || 0;
+                saveToFirebase();
+            }
+
+            const team1Score = parseInt(document.getElementById('team1Score').value) || 0;
+            const team2Score = parseInt(document.getElementById('team2Score').value) || 0;
+            
+            const team1Last = team1Score % 10;
+            const team2Last = team2Score % 10;
+
+            // Remove all winner highlights
+            document.querySelectorAll('.square').forEach(sq => sq.classList.remove('winner'));
+
+            if (team1Numbers.length === 0 || team2Numbers.length === 0) {
+                document.getElementById('winnerDisplay').style.display = 'none';
+                updateHistory();
+                return;
+            }
+
+            // Find the winning square
+            const team1Index = team1Numbers.indexOf(team1Last);
+            const team2Index = team2Numbers.indexOf(team2Last);
+
+            if (team1Index !== -1 && team2Index !== -1) {
+                const winnerName = grid[team2Index][team1Index];
+                const team1Name = document.getElementById('team1Name').value || 'Team 1';
+                const team2Name = document.getElementById('team2Name').value || 'Team 2';
+                
+                // Highlight winning square
+                const winningSquare = document.querySelector(`[data-row="${team2Index}"][data-col="${team1Index}"]`);
+                if (winningSquare) {
+                    winningSquare.classList.add('winner');
+                }
+
+                const winnerDisplay = document.getElementById('winnerDisplay');
+                const qLabel = currentQuarter === 4 ? 'Final' : `Q${currentQuarter}`;
+                if (winnerName) {
+                    winnerDisplay.innerHTML = `🎉 <strong>${qLabel} Winner: ${winnerName}</strong> (${team1Last}, ${team2Last})`;
+                } else {
+                    winnerDisplay.innerHTML = `${qLabel} winning square (${team1Last}, ${team2Last}) is unclaimed!`;
+                }
+                winnerDisplay.style.display = 'block';
+            } else {
+                document.getElementById('winnerDisplay').style.display = 'none';
+            }
+            
+            updateHistory();
+        }
+
     </script>
-</head>
-<body>
-    <h1>Super Bowl Squares</h1>
-    <div id="squares-container"></div>
 </body>
 </html>
