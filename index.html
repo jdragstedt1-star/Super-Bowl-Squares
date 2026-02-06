@@ -494,6 +494,18 @@
             });
         }
 
+        //Load initial numbers JOsh Added Code
+        document.addEventListener('DOMContentLoaded', function() {
+        // Only randomize if numbers don't exist yet
+            if (team1Numbers.length === 0 || team2Numbers.length === 0) {
+            randomizeNumbers();
+                }
+    
+                gameRef.on('value', (snapshot) => {
+                // ... rest of your code
+            });
+});
+        
         // Wait for DOM to be ready before setting up Firebase listener
         document.addEventListener('DOMContentLoaded', function() {
             // Listen for changes from Firebase
