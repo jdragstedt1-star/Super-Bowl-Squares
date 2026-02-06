@@ -481,47 +481,6 @@
         };
         let isInitialLoad = true;
 
-        // Listen for changes from Firebase
-        gameRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                // Update local state from Firebase
-                if (data.grid) {
-                    grid = data.grid;
-                }
-                if (data.team1Numbers) {
-                    team1Numbers = data.team1Numbers;
-                }
-                if (data.team2Numbers) {
-                    team2Numbers = data.team2Numbers;
-                }
-                if (data.quarterScores) {
-                    quarterScores = data.quarterScores;
-                }
-                if (data.team1Name) {
-                    document.getElementById('team1Name').value = data.team1Name;
-                }
-                if (data.team2Name) {
-                    document.getElementById('team2Name').value = data.team2Name;
-                }
-                
-                // Update UI
-                initGrid();
-                if (!isInitialLoad) {
-                    // Update current quarter display
-                    const currentQ = data.currentQuarter || currentQuarter;
-                    if (currentQ !== currentQuarter) {
-                        selectQuarter(currentQ);
-                    } else {
-                        document.getElementById('team1Score').value = quarterScores[currentQuarter].team1;
-                        document.getElementById('team2Score').value = quarterScores[currentQuarter].team2;
-                        updateWinner();
-                    }
-                }
-                isInitialLoad = false;
-            }
-        });
-
         // Save game state to Firebase
         function saveToFirebase() {
             gameRef.set({
@@ -534,6 +493,70 @@
                 team2Name: document.getElementById('team2Name').value
             });
         }
+
+        // Wait for DOM to be ready before setting up Firebase listener
+        document.addEventListener('DOMContentLoaded', function() {
+            // Listen for changes from Firebase
+            gameRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    // Update local state from Firebase
+                    if (data.grid) {
+                        grid = data.grid;
+                    }
+                    if (data.team1Numbers) {
+                        team1Numbers = data.team1Numbers;
+                    }
+                    if (data.team2Numbers) {
+                        team2Numbers = data.team2Numbers;
+                    }
+                    if (data.quarterScores) {
+                        quarterScores = data.quarterScores;
+                    }
+                    if (data.team1Name) {
+                        document.getElementById('team1Name').value = data.team1Name;
+                    }
+                    if (data.team2Name) {
+                        document.getElementById('team2Name').value = data.team2Name;
+                    }
+                    
+                    // Update UI
+                    initGrid();
+                    if (!isInitialLoad) {
+                        // Update current quarter display
+                        const currentQ = data.currentQuarter || currentQuarter;
+                        if (currentQ !== currentQuarter) {
+                            selectQuarter(currentQ);
+                        } else {
+                            document.getElementById('team1Score').value = quarterScores[currentQuarter].team1;
+                            document.getElementById('team2Score').value = quarterScores[currentQuarter].team2;
+                            updateWinner();
+                        }
+                    }
+                    isInitialLoad = false;
+                }
+            });
+
+            // Initialize the grid
+            initGrid();
+
+            // Set up event listeners
+            document.getElementById('nameInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    claimSquare();
+                }
+            });
+
+            document.getElementById('team1Name').addEventListener('input', () => {
+                updateTeamLabels();
+                saveToFirebase();
+            });
+            
+            document.getElementById('team2Name').addEventListener('input', () => {
+                updateTeamLabels();
+                saveToFirebase();
+            });
+        });
 
         function randomizeNumbers() {
             team1Numbers = shuffle([...Array(10).keys()]);
@@ -803,25 +826,6 @@
             updateHistory();
         }
 
-        // Allow Enter key to claim square
-        document.getElementById('nameInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                claimSquare();
-            }
-        });
-
-        // Update team labels when names change
-        document.getElementById('team1Name').addEventListener('input', () => {
-            updateTeamLabels();
-            saveToFirebase();
-        });
-        document.getElementById('team2Name').addEventListener('input', () => {
-            updateTeamLabels();
-            saveToFirebase();
-        });
-
-        // Initialize
-        initGrid();
     </script>
 </body>
 </html>
