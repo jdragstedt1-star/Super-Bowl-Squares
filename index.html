@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Bowl Squares</title>
+    <!-- Add Firebase SDK scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
     <script>
@@ -16,22 +17,34 @@
             storageBucket: "YOUR_STORAGE_BUCKET",
             messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
             appId: "YOUR_APP_ID"
-        };
-
+        }; 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database(app);
+        // Initialize Database
+        const database = firebase.database();
 
-        // Firebase listener to fetch and display squares
-        firebase.database().ref('squares').on('value', (snapshot) => {
-            const data = snapshot.val();
-            // Update your UI with the fetched data
-            console.log(data);
-        });
+        function loadSquares() {
+            const squaresRef = database.ref('squares');
+            squaresRef.once('value').then(snapshot => {
+                const squares = snapshot.val();
+                // Code to populate squares on page load
+                populateSquares(squares);
+            });
+        }
+
+        function populateSquares(squares) {
+            // Code to add squares to the DOM
+            console.log(squares);
+            // Implement your logic to handle squares here
+        }
+
+        window.onload = function() {
+            loadSquares();
+        };
     </script>
 </head>
 <body>
-    <h1>Welcome to Super Bowl Squares</h1>
-    <div id="squares"></div>
+    <h1>Super Bowl Squares</h1>
+    <div id="squares-container"></div>
 </body>
 </html>
