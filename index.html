@@ -1,70 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Bowl Squares</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Listen for changes from Firebase
-            gameRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    // Update local state from Firebase
-                    if (data.grid) {
-                        grid = data.grid;
-                    }
-                    if (data.team1Numbers) {
-                        team1Numbers = data.team1Numbers;
-                    }
-                    if (data.team2Numbers) {
-                        team2Numbers = data.team2Numbers;
-                    }
-                    if (data.quarterScores) {
-                        quarterScores = data.quarterScores;
-                    }
-                    if (data.team1Name) {
-                        document.getElementById('team1Name').value = data.team1Name;
-                    }
-                    if (data.team2Name) {
-                        document.getElementById('team2Name').value = data.team2Name;
-                    }
-                    
-                    // Update UI
-                    initGrid();
-                    if (!isInitialLoad) {
-                        // Update current quarter display
-                        const currentQ = data.currentQuarter || currentQuarter;
-                        if (currentQ !== currentQuarter) {
-                            selectQuarter(currentQ);
-                        } else {
-                            document.getElementById('team1Score').value = quarterScores[currentQuarter].team1;
-                            document.getElementById('team2Score').value = quarterScores[currentQuarter].team2;
-                            updateWinner();
-                        }
-                    }
-                    isInitialLoad = false;
-                } else {
-                    // No data in Firebase - initialize with default numbers
-                    if (team1Numbers.length === 0) {
-                        randomizeNumbers();
-                    }
-                    initGrid();
-                    isInitialLoad = false;
-                }
-            });
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database(app);
 
-            // Initialize the grid
-            initGrid();
-
-            // Set up event listeners
-            document.getElementById('nameInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    claimSquare();
-                }
-            });
-
-            document.getElementById('team1Name').addEventListener('input', () => {
-                updateTeamLabels();
-                saveToFirebase();
-            });
-            
-            document.getElementById('team2Name').addEventListener('input', () => {
-                updateTeamLabels();
-                saveToFirebase();
-            });
+        // Firebase listener to fetch and display squares
+        firebase.database().ref('squares').on('value', (snapshot) => {
+            const data = snapshot.val();
+            // Update your UI with the fetched data
+            console.log(data);
         });
+    </script>
+</head>
+<body>
+    <h1>Welcome to Super Bowl Squares</h1>
+    <div id="squares"></div>
+</body>
+</html>
