@@ -484,11 +484,8 @@
                 alert('Please enter your name first!');
                 return;
             }
-
-
-
-
-          // If square is already claimed
+            const squareKey = `${row}-${col}`;
+            // If square is already claimed
             if (gameState.squares[squareKey]) {
                 // Check if it's the same player trying to unclaim
                 if (gameState.squares[squareKey] === playerName) {
