@@ -485,9 +485,22 @@
                 return;
             }
 
-            const squareKey = `${row}-${col}`;
+
+
+
+          // If square is already claimed
             if (gameState.squares[squareKey]) {
-                alert('This square is already claimed!');
+                // Check if it's the same player trying to unclaim
+                if (gameState.squares[squareKey] === playerName) {
+                    if (confirm(`Remove your name from this square?`)) {
+                        // Remove the square
+                        const updates = {};
+                        updates[`game/squares/${squareKey}`] = null;
+                        update(ref(database), updates);
+                    }
+                } else {
+                    alert(`This square is claimed by ${gameState.squares[squareKey]}`);
+                }
                 return;
             }
 
