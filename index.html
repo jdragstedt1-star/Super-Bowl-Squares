@@ -779,10 +779,9 @@
             const { row, col } = currentSquare;
             
             grid[row][col] = name || null;
-        
+            closeModal();
             updateWinner();
             saveToFirebase();
-            closeModal();
         }
 
         function updateWinner() {
