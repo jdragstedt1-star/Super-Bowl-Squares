@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- The viewport meta tag is crucial for responsive design on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Links Page</title>
+    <style>
+        /* Basic mobile-first styling */
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+            /* Using vw units makes text size responsive to the viewport width */
+            font-size: 4vw; 
+        }
+        .container {
+            max-width: 600px;
+            margin: auto; /* Centers the content on larger screens */
+        }
+        h1 {
+            color: #333;
+            font-size: 6vw;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 15px;
+        }
+        a {
+            /* Make links look like large, easy-to-tap buttons for touchscreens */
+            display: block;
+            padding: 15px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 5px;
+            /* Ensure links/buttons are large enough for touch targets (Apple suggests 44x44 points) */
+            min-height: 44px; 
+            box-sizing: border-box;
+        }
+        a:hover, a:focus {
+            background-color: #0056b3;
+        }
+
+        /* Media query for larger screens (e.g., tablets and desktops) */
+        @media screen and (min-width: 600px) {
+            body {
+                font-size: 1rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Mobile Page</h1>
+        <p>This page is designed to be mobile-friendly and links to other sample pages.</p>
+        <ul>
+            <!-- The <a> tag creates a hyperlink using the href attribute -->
+            <li>
+                <a href="about.html">Go to the About Page</a>
+            </li>
+            <li>
+                <a href="contact.html">Go to the Contact Page</a>
+            </li>
+            <li>
+                <a href="https://www.w3schools.com" target="_blank">Visit W3Schools HTML Tutorial</a>
+            </li>
+            <li>
+                 <!-- Example of a phone call link for mobile devices -->
+                <a href="tel:+1-555-555-5555">Call Us (Tap to dial)</a>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
