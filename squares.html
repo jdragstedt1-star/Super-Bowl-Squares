@@ -481,8 +481,11 @@
         };
         let isInitialLoad = true;
 
+        let isSavingLocally = false;
+
         // Save game state to Firebase
         function saveToFirebase() {
+            isSavingLocally = true;
             gameRef.set({
                 grid: grid,
                 team1Numbers: team1Numbers,
@@ -491,6 +494,11 @@
                 currentQuarter: currentQuarter,
                 team1Name: document.getElementById('team1Name').value,
                 team2Name: document.getElementById('team2Name').value
+            }).then(() => {
+                // Small delay to prevent immediate re-trigger
+                setTimeout(() => {
+                    isSavingLocally = false;
+                }, 100);
             });
         }
 
@@ -499,7 +507,7 @@
             // Listen for changes from Firebase
             gameRef.on('value', (snapshot) => {
                 const data = snapshot.val();
-                if (data) {
+                if (data && !isSavingLocally) {
                     // Update local state from Firebase
                     if (data.grid) {
                         grid = data.grid;
@@ -584,6 +592,7 @@
                 grid = Array(10).fill().map(() => Array(10).fill(null));
                 initGrid();
                 updateWinner();
+                saveToFirebase();
             }
         }
 
@@ -798,6 +807,13 @@
             const { row, col } = currentSquare;
             
             grid[row][col] = name || null;
+            
+            // Force a complete grid refresh
+            const gridElement = document.getElementById('grid');
+            if (gridElement) {
+                gridElement.innerHTML = '';
+            }
+            
             initGrid();
             updateWinner();
             saveToFirebase();
