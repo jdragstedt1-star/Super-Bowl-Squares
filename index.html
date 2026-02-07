@@ -40,7 +40,14 @@
             margin-bottom: 30px;
             font-size: 1.1em;
         }
-
+        
+        .subtitle2 {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.9em;
+        }
+        
         .controls {
             display: flex;
             gap: 15px;
@@ -321,7 +328,7 @@
         <p class="subtitle">Pick your squares and win!</p>
         <p class="subtitle">Pick your squares and win!</p>
         <p class="subtitle">$1 per square</p>
-        <p class="Body">Q1 Wins $10  Halftime Wins $20   Q3 Wins $10  Final Wins $100</p>
+        <p class="subtitle">Q1 Wins $10  Halftime Wins $20   Q3 Wins $10  Final Wins $100</p>
         <div class="status" id="status">Loading game...</div>
 
         <div class="stats">
@@ -338,7 +345,6 @@
         <div class="controls">
             <input type="text" id="playerName" placeholder="Enter your name">
             <button onclick="generateNumbers()" id="generateBtn">Generate Numbers</button>
-            <button onclick="resetGame()" class="reset-btn">Reset Game</button>
         </div>
 
         <div class="grid-wrapper">
@@ -376,6 +382,9 @@
                 <input type="number" id="q4-team2" placeholder="Seahawks Score" min="0" max="99" onchange="updateScores()">
                 <div class="winner" id="q4-winner" style="display:none;"></div>
             </div>
+        </div>
+        <div class="controls">
+            <button onclick="resetGame()" class="reset-btn">Reset Game</button>
         </div>
     </div>
 
