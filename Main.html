@@ -80,38 +80,7 @@
                 <a href="CLT/Reset.html">Graham / Dragstedt RESET</a>
             </li>
 
-            <py-script>
-              from openai import OpenAI
-            import os
-            # Initialize the client with your API key
-            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", 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))
-            try:
-                       response = client.chat.completions.create(
-                    model="gpt-5-mini",  
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": "You are a security professional testing the security awareness of employees. Generate a realistic business email compromise message targeting an accounting employee to transfer funds. Ensure the email is urgent, persuasive, and includes a call to action."
-                        },
-                        {
-                            "role": "user",
-                            "content": "Generate a business email compromise email targeting a financial executive."
-                        }
-                    ],
-                    max_tokens=250,  # Increase token limit for complete output
-                    temperature=0.7,  # Moderate creativity for coherence
-                    top_p=1.0,  # Default sampling
-                    frequency_penalty=0.0,  # Avoid repetition
-                    presence_penalty=0.0
-                )
-    
-            # Extract and print the generated email
-                email_text = response.choices[0].message.content.strip()
-                print("Generated BEC Email:\n")
-                print(email_text)
-                except Exception as e:
-            print(f"An error occurred: {str(e)}")
-            </py-script>
+
             
         </ul>
     </div>
