@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Brophy Master Family Tree</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+  background: #f4f6f8;
+}
+
+#toolbar {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+
+#search {
+  padding: 5px;
+  width: 200px;
+}
+
+button {
+  padding: 5px 10px;
+  margin-left: 5px;
+}
+
+.node circle {
+  fill: #4a6fa5;
+  cursor: pointer;
+}
+
+.node text {
+  font-size: 12px;
+  fill: #000;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
+
+#details {
+  position: fixed;
+  right: 10px;
+  top: 10px;
+  width: 260px;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+.dark {
+  background: #1e1e1e;
+  color: white;
+}
+
+.dark #toolbar,
+.dark #details {
+  background: #2a2a2a;
+  color: white;
+}
+
+.dark .node text {
+  fill: white;
+}
+
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <input type="text" id="search" placeholder="Search name...">
+  <button onclick="toggleDark()">Dark Mode</button>
+</div>
+
+<div id="details">
+  <h3>Person Details</h3>
+  <div id="info">Click a name</div>
+</div>
+
+<script>
+
+// =====================
+// FAMILY DATA (EDITABLE)
+// =====================
+
+const treeData = {
+  name: "Joseph Henry Brophy (1893–1916)",
+  birth: "April 27, 1893 – New Haven, CT",
+  death: "December 14, 1916 – Orange, CT",
+  children: [
+    {
+      name: "Jack Joseph Brophy (1917–1995)",
+      birth: "August 31, 1917",
+      death: "September 25, 1995",
+      children: [
+        {
+          name: "Mark Joseph Brophy (1946– )",
+          birth: "October 31, 1946",
+          children: [
+            {
+              name: "Adam Brophy",
+              children: [
+                { name: "Benjamin Brophy" },
+                { name: "Jon Brophy" }
+              ]
+            },
+            { name: "Rebecca Brophy" },
+            { name: "Caitlin Brophy" }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+// =====================
+// TREE SETUP
+// =====================
+
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+const svg = d3.select("body")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height)
+  .call(d3.zoom().on("zoom", (event) => {
+      g.attr("transform", event.transform);
+  }));
+
+const g = svg.append("g");
+
+const root = d3.hierarchy(treeData);
+const treeLayout = d3.tree().size([height - 100, width - 300]);
+treeLayout(root);
+
+g.selectAll('.link')
+  .data(root.links())
+  .enter()
+  .append('path')
+  .attr('class', 'link')
+  .attr('d', d3.linkHorizontal()
+      .x(d => d.y + 50)
+      .y(d => d.x + 50)
+  );
+
+const node = g.selectAll('.node')
+  .data(root.descendants())
+  .enter()
+  .append('g')
+  .attr('class', 'node')
+  .attr("transform", d => `translate(${d.y + 50},${d.x + 50})`)
+  .on("click", (event, d) => showDetails(d.data));
+
+node.append('circle')
+  .attr('r', 8);
+
+node.append('text')
+  .attr("dy", ".35em")
+  .attr("x", 12)
+  .text(d => d.data.name);
+
+// =====================
+// DETAILS PANEL
+// =====================
+
+function showDetails(person) {
+  document.getElementById("info").innerHTML = `
+    <strong>${person.name}</strong><br><br>
+    Birth: ${person.birth || "Unknown"}<br>
+    Death: ${person.death || "—"}<br>
+  `;
+}
+
+// =====================
+// SEARCH FUNCTION
+// =====================
+
+document.getElementById("search").addEventListener("input", function() {
+  const value = this.value.toLowerCase();
+  node.select("circle")
+    .attr("fill", d =>
+      d.data.name.toLowerCase().includes(value) ? "orange" : "#4a6fa5"
+    );
+});
+
+// =====================
+// DARK MODE
+// =====================
+
+function toggleDark() {
+  document.body.classList.toggle("dark");
+}
+
+</script>
+</body>
+</html>
