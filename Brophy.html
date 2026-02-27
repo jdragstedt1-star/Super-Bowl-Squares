@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Brophy Master Family Tree</title>
 <script src="https://d3js.org/d3.v7.min.js"></script>
+
 <style>
 body {
   margin: 0;
@@ -33,8 +34,7 @@ button {
   margin-left: 5px;
 }
 
-.node circle {
-  fill: #4a6fa5;
+.node image {
   cursor: pointer;
 }
 
@@ -53,13 +53,19 @@ button {
   position: fixed;
   right: 10px;
   top: 10px;
-  width: 260px;
+  width: 300px;
   background: white;
   padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.2);
   overflow-y: auto;
   max-height: 90vh;
+}
+
+.profile-photo {
+  width: 100%;
+  border-radius: 6px;
+  margin-bottom: 10px;
 }
 
 .dark {
@@ -76,9 +82,9 @@ button {
 .dark .node text {
   fill: white;
 }
-
 </style>
 </head>
+
 <body>
 
 <div id="toolbar">
@@ -88,38 +94,42 @@ button {
 
 <div id="details">
   <h3>Person Details</h3>
-  <div id="info">Click a name</div>
+  <div id="info">Click a person</div>
 </div>
 
 <script>
 
-// =====================
-// FAMILY DATA (EDITABLE)
-// =====================
+// ======================
+// FAMILY DATA (EXPAND THIS)
+// ======================
 
 const treeData = {
   name: "Joseph Henry Brophy (1893–1916)",
+  id: "joseph_henry_brophy",
   birth: "April 27, 1893 – New Haven, CT",
   death: "December 14, 1916 – Orange, CT",
   children: [
     {
       name: "Jack Joseph Brophy (1917–1995)",
+      id: "jack_joseph_brophy",
       birth: "August 31, 1917",
       death: "September 25, 1995",
       children: [
         {
           name: "Mark Joseph Brophy (1946– )",
+          id: "mark_joseph_brophy",
           birth: "October 31, 1946",
           children: [
             {
               name: "Adam Brophy",
+              id: "adam_brophy",
               children: [
-                { name: "Benjamin Brophy" },
-                { name: "Jon Brophy" }
+                { name: "Benjamin Brophy", id: "benjamin_brophy" },
+                { name: "Jon Brophy", id: "jon_brophy" }
               ]
             },
-            { name: "Rebecca Brophy" },
-            { name: "Caitlin Brophy" }
+            { name: "Rebecca Brophy", id: "rebecca_brophy" },
+            { name: "Caitlin Brophy", id: "caitlin_brophy" }
           ]
         }
       ]
@@ -127,9 +137,9 @@ const treeData = {
   ]
 };
 
-// =====================
+// ======================
 // TREE SETUP
-// =====================
+// ======================
 
 const width = window.innerWidth;
 const height = window.innerHeight;
@@ -166,41 +176,51 @@ const node = g.selectAll('.node')
   .attr("transform", d => `translate(${d.y + 50},${d.x + 50})`)
   .on("click", (event, d) => showDetails(d.data));
 
-node.append('circle')
-  .attr('r', 8);
+node.append("image")
+  .attr("xlink:href", d => `photos/${d.data.id}.jpg`)
+  .attr("x", -20)
+  .attr("y", -20)
+  .attr("width", 40)
+  .attr("height", 40)
+  .attr("clip-path", "circle(20px at 20px 20px)")
+  .on("error", function() {
+      d3.select(this).attr("xlink:href", "");
+  });
 
 node.append('text')
-  .attr("dy", ".35em")
-  .attr("x", 12)
+  .attr("dy", 30)
+  .attr("text-anchor", "middle")
   .text(d => d.data.name);
 
-// =====================
+// ======================
 // DETAILS PANEL
-// =====================
+// ======================
 
 function showDetails(person) {
   document.getElementById("info").innerHTML = `
+    <img src="photos/${person.id}.jpg" class="profile-photo"
+      onerror="this.style.display='none'">
     <strong>${person.name}</strong><br><br>
     Birth: ${person.birth || "Unknown"}<br>
     Death: ${person.death || "—"}<br>
   `;
 }
 
-// =====================
-// SEARCH FUNCTION
-// =====================
+// ======================
+// SEARCH
+// ======================
 
 document.getElementById("search").addEventListener("input", function() {
   const value = this.value.toLowerCase();
-  node.select("circle")
+  node.select("text")
     .attr("fill", d =>
-      d.data.name.toLowerCase().includes(value) ? "orange" : "#4a6fa5"
+      d.data.name.toLowerCase().includes(value) ? "orange" : "black"
     );
 });
 
-// =====================
+// ======================
 // DARK MODE
-// =====================
+// ======================
 
 function toggleDark() {
   document.body.classList.toggle("dark");
